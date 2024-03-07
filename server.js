@@ -18,13 +18,15 @@ const requestListener = (req, res) => {
          data:[]
     }));
     res.end();
-  } else if (req.url === "/" && req.method == "DELETE") {
-    res.writeHead(200, headers);
-    res.write("刪除成功");
-    res.end();
-  } else {
+  } else if (req.method == "OPTIONS") {
+     res.writeHead(200, headers);
+     res.end();
+  }else {
     res.writeHead(404, headers);
-    res.write("輸入錯誤");
+     res.write(JSON.stringify({
+        "status":"false",
+         Message:"輸入資料錯誤"
+    }));
     res.end();
   }
 }
