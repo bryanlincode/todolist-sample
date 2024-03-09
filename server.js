@@ -1,6 +1,9 @@
 const http = require("http");
-const { v4: uuidv4 } = require('uuid');
-// const { title } = require("process");
+const {
+  v4: uuidv4
+} = require('uuid');
+
+const errorHandle = require("./errorHandle")
 
 const todos = [];
 
@@ -19,36 +22,43 @@ const requestListener = (req, res) => {
   if (req.url === "/todos" && req.method == "GET") {
     res.writeHead(200, headers);
     res.write(JSON.stringify({
-        "status":"success",
-         data:todos
+      "status": "success",
+      data: todos
     }));
     res.end();
-  } else if (req.url === "/todos" && req.method == "POST"){
-   req.on('end', () => {
-    const  title = JSON.parse(body).title;
-    const todo = {
-        "title":title,
-        "id": uuidv4(),
-    }
-    console.log(todo);
-    todos.push(todo)
-   res.writeHead(200, headers);
-     res.write(JSON.stringify({
-        "status":"success",
-         data: todos
-    }));
-  });
-     
-    res.end();
+  } else if (req.url === "/todos" && req.method == "POST") {
+    req.on('end', () => {
+      try {
+        const title = JSON.parse(body).title;
+        if (title !== undefined) {
+          const todo = {
+            "title": title,
+            "id": uuidv4(),
+          }
+          console.log(todo);
+          todos.push(todo)
+          res.writeHead(200, headers);
+          res.write(JSON.stringify({
+            "status": "success",
+            data: todos
+          }));
+          res.end();
+        } else {
+         errorHandle(res);
+        }
+      } catch (error) {
+          errorHandle(res);
+      }
 
-  }else if (req.method == "OPTIONS") {
-     res.writeHead(200, headers);
-     res.end();
-  }else {
+    });
+  } else if (req.method == "OPTIONS") {
+    res.writeHead(200, headers);
+    res.end();
+  } else {
     res.writeHead(404, headers);
-     res.write(JSON.stringify({
-        "status":"false",
-         Message:"輸入資料錯誤"
+    res.write(JSON.stringify({
+      "status": "false",
+      Message: "輸入資料錯誤"
     }));
     res.end();
   }
