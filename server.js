@@ -3,7 +3,10 @@ const {
   v4: uuidv4
 } = require('uuid');
 
-const errorHandle = require("./errorHandle")
+const errorHandle = require("./errorHandle");
+const {
+  log
+} = require("console");
 
 const todos = [];
 
@@ -44,15 +47,60 @@ const requestListener = (req, res) => {
           }));
           res.end();
         } else {
-         errorHandle(res);
+          errorHandle(res);
         }
       } catch (error) {
-          errorHandle(res);
+        errorHandle(res);
       }
 
     });
+  } else if (req.url === "/todos" && req.method == "DELETE") {
+    todos.length = 0
+    res.writeHead(200, headers);
+    res.write(JSON.stringify({
+      "status": "success",
+      data: todos
+    }));
+    res.end();
+  } else if (req.url.startsWith("/todos/") && req.method == "DELETE") {
+    // 取出id
+    const id = req.url.split("/").pop();
+    // 抓索引
+    const index = todos.findIndex(Element => Element.id == id)
+    console.log(id, index);
+    if (index !== -1) {
+      todos.splice(index, 1)
+      res.writeHead(200, headers);
+      res.write(JSON.stringify({
+        "status": "success",
+        data: todos,
+        "message": "刪除成功!"
+      }));
+      res.end();
+    } else {
+      errorHandle(res)
+    }
+  } else if (req.url.startsWith("/todos/") && req.method == "PATCH") {
+    req.on("end", () => {
+      try {
+        const todo = JSON.parse(body).title;
+        const id = req.url.split('/').pop();
+        const index = todos.findIndex(element => element.id == id)
+        if (todo !== undefined && index !== -1) {
+          // 經由 todo 比對是否有 title 或 index 是否有索引值
+          todos[index].title = todo
+        } else {
+          errorHandle(res)
+        }
+        console.log(index);
+        res.end();
+      } catch {
+        errorHandle(res);
+      }
+    })
   } else if (req.method == "OPTIONS") {
     res.writeHead(200, headers);
+    x
     res.end();
   } else {
     res.writeHead(404, headers);
