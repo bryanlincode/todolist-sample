@@ -87,7 +87,7 @@ const requestListener = (req, res) => {
         const id = req.url.split('/').pop();
         const index = todos.findIndex(element => element.id == id)
         if (todo !== undefined && index !== -1) {
-          // 經由 todo 比對是否有 title 或 index 是否有索引值
+          // 經由 todo 比對是否有 title 或 index 是否有索引值存在
           todos[index].title = todo
         } else {
           errorHandle(res)
